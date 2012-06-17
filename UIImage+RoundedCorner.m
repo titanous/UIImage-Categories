@@ -41,7 +41,7 @@
     CGContextRelease(context);
     
     // Create a UIImage from the CGImage
-    UIImage *roundedImage = [UIImage imageWithCGImage:clippedImage];
+    UIImage *roundedImage = [UIImage imageWithCGImage:clippedImage scale:self.scale orientation:self.imageOrientation];
     CGImageRelease(clippedImage);
     
     return roundedImage;
