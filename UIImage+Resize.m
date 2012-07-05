@@ -12,7 +12,8 @@
 // Returns a copy of this image that is cropped to the given bounds.
 // The bounds will be adjusted using CGRectIntegral.
 - (UIImage *)croppedImage:(CGRect)bounds {
-    bounds = CGRectIntegral(bounds);
+    bounds = CGRectIntegral(CGRectMake(bounds.origin.x * self.scale, bounds.origin.y * self.scale,
+                                       bounds.size.width * self.scale, bounds.size.height * self.scale));
     CGRect newBounds; // transformed bounds to preserve image orientation
     switch ( self.imageOrientation ) {
         case UIImageOrientationUpMirrored:
@@ -137,7 +138,7 @@
                 transform:(CGAffineTransform)transform
            drawTransposed:(BOOL)transpose
      interpolationQuality:(CGInterpolationQuality)quality {
-    CGRect newRect = CGRectIntegral(CGRectMake(0, 0, newSize.width, newSize.height));
+    CGRect newRect = CGRectIntegral(CGRectMake(0, 0, newSize.width * self.scale, newSize.height * self.scale));
     CGRect transposedRect = CGRectMake(0, 0, newRect.size.height, newRect.size.width);
     CGImageRef imageRef = self.CGImage;
     
