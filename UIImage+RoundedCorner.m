@@ -26,7 +26,7 @@
 
     // Create a clipping path with rounded corners
     CGContextBeginPath(context);
-    [self addRoundedRectToPath:CGRectMake(borderSize, borderSize, image.size.width * self.scale - borderSize * 2, image.size.height * self.scale - borderSize * 2)
+    [self addRoundedRectToPath:CGRectMake(borderSize * self.scale, borderSize * self.scale, image.size.width * self.scale - borderSize * self.scale * 2, image.size.height * self.scale - borderSize * self.scale * 2)
                        context:context
                      ovalWidth:cornerSize
                     ovalHeight:cornerSize];
