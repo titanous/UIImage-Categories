@@ -7,7 +7,7 @@
 
 @implementation UIImage (Alpha)
 
-// Returns true if the image has an alpha layer
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)hasAlpha {
     CGImageAlphaInfo alpha = CGImageGetAlphaInfo(self.CGImage);
     return (alpha == kCGImageAlphaFirst ||
@@ -16,7 +16,7 @@
             alpha == kCGImageAlphaPremultipliedLast);
 }
 
-// Returns a copy of the given image, adding an alpha channel if it doesn't already have one
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (UIImage *)imageWithAlpha {
     if ([self hasAlpha]) {
         return self;
@@ -48,8 +48,7 @@
     return imageWithAlpha;
 }
 
-// Returns a copy of the image with a transparent border of the given size added around its edges.
-// If the image has no alpha layer, one will be added to it.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (UIImage *)transparentBorderImage:(NSUInteger)borderSize {
     // If the image does not have an alpha layer, add one
     UIImage *image = [self imageWithAlpha];
@@ -84,12 +83,9 @@
     return transparentBorderImage;
 }
 
-#pragma mark -
-#pragma mark Private helper methods
+#pragma mark - Private helper methods
 
-// Creates a mask that makes the outer edges transparent and everything else opaque
-// The size must include the entire mask (opaque part + transparent border)
-// The caller is responsible for releasing the returned reference by calling CGImageRelease
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (CGImageRef)newBorderMask:(NSUInteger)borderSize size:(CGSize)size {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
     
