@@ -11,10 +11,46 @@
 
 // Returns a copy of this image that is cropped to the given bounds.
 // The bounds will be adjusted using CGRectIntegral.
-// This method ignores the image's imageOrientation setting.
 - (UIImage *)croppedImage:(CGRect)bounds {
-    CGImageRef imageRef = CGImageCreateWithImageInRect([self CGImage], bounds);
-    UIImage *croppedImage = [UIImage imageWithCGImage:imageRef];
+    bounds = CGRectIntegral(CGRectMake(bounds.origin.x * self.scale, bounds.origin.y * self.scale,
+                                       bounds.size.width * self.scale, bounds.size.height * self.scale));
+    CGRect newBounds; // transformed bounds to preserve image orientation
+    switch ( self.imageOrientation ) {
+        case UIImageOrientationUpMirrored:
+            newBounds = CGRectMake(self.size.width - bounds.origin.x - bounds.size.width,
+                                   bounds.origin.y, bounds.size.width, bounds.size.height);
+            break;
+        case UIImageOrientationDown:
+            newBounds = CGRectMake(self.size.width - bounds.origin.x - bounds.size.width,
+                                   self.size.height - bounds.origin.y - bounds.size.height,
+                                   bounds.size.width, bounds.size.height);
+            break;
+        case UIImageOrientationDownMirrored:
+            newBounds = CGRectMake(bounds.origin.x, self.size.height - bounds.origin.y - bounds.size.height,
+                                   bounds.size.width, bounds.size.height);
+            break;
+        case UIImageOrientationRight:
+            newBounds = CGRectMake(bounds.origin.y, self.size.width - bounds.origin.x - bounds.size.width,
+                                   bounds.size.height, bounds.size.width);
+            break;
+        case UIImageOrientationRightMirrored:
+            newBounds = CGRectMake(self.size.height - bounds.origin.y - bounds.size.height,
+                                   self.size.width - bounds.origin.x - bounds.size.width,
+                                   bounds.size.height, bounds.size.width);
+            break;
+        case UIImageOrientationLeft:
+            newBounds = CGRectMake(self.size.height - bounds.origin.y - bounds.size.height, bounds.origin.x,
+                                   bounds.size.height, bounds.size.width);
+            break;
+        case UIImageOrientationLeftMirrored:
+            newBounds = CGRectMake(bounds.origin.y, bounds.origin.x, bounds.size.height, bounds.size.width);
+            break;
+        case UIImageOrientationUp:
+        default:
+            newBounds = bounds;
+    }
+    CGImageRef imageRef = CGImageCreateWithImageInRect([self CGImage], newBounds);
+    UIImage *croppedImage = [UIImage imageWithCGImage:imageRef scale:self.scale orientation:self.imageOrientation];
     CGImageRelease(imageRef);
     return croppedImage;
 }
@@ -49,29 +85,19 @@
     BOOL drawTransposed;
     CGAffineTransform transform = CGAffineTransformIdentity;
     
-    // In iOS 5 the image is already correctly rotated. See Eran Sandler's
-    // addition here: http://eran.sandler.co.il/2011/11/07/uiimage-in-ios-5-orientation-and-resize/
-    
-    if ( [[[UIDevice currentDevice] systemVersion] floatValue] >= 5.0 ) 
+    switch ( self.imageOrientation )
     {
-        drawTransposed = NO;  
-    } 
-    else 
-    {    
-        switch ( self.imageOrientation ) 
-        {
-            case UIImageOrientationLeft:
-            case UIImageOrientationLeftMirrored:
-            case UIImageOrientationRight:
-            case UIImageOrientationRightMirrored:
-                drawTransposed = YES;
-                break;
-            default:
-                drawTransposed = NO;
-        }
+        case UIImageOrientationLeft:
+        case UIImageOrientationLeftMirrored:
+        case UIImageOrientationRight:
+        case UIImageOrientationRightMirrored:
+            drawTransposed = YES;
+            break;
+        default:
+            drawTransposed = NO;
+    }
         
-        transform = [self transformForOrientation:newSize];
-    } 
+    transform = [self transformForOrientation:newSize];
     
     return [self resizedImage:newSize transform:transform drawTransposed:drawTransposed interpolationQuality:quality];
 }
@@ -112,7 +138,7 @@
                 transform:(CGAffineTransform)transform
            drawTransposed:(BOOL)transpose
      interpolationQuality:(CGInterpolationQuality)quality {
-    CGRect newRect = CGRectIntegral(CGRectMake(0, 0, newSize.width, newSize.height));
+    CGRect newRect = CGRectIntegral(CGRectMake(0, 0, newSize.width * self.scale, newSize.height * self.scale));
     CGRect transposedRect = CGRectMake(0, 0, newRect.size.height, newRect.size.width);
     CGImageRef imageRef = self.CGImage;
     
@@ -140,7 +166,7 @@
     
     // Get the resized image from the context and a UIImage
     CGImageRef newImageRef = CGBitmapContextCreateImage(bitmap);
-    UIImage *newImage = [UIImage imageWithCGImage:newImageRef];
+    UIImage *newImage = [UIImage imageWithCGImage:newImageRef scale:self.scale orientation:UIImageOrientationUp];
     
     // Clean up
     CGContextRelease(bitmap);

@@ -38,7 +38,8 @@
     // Draw the image into the context and retrieve the new image, which will now have an alpha layer
     CGContextDrawImage(offscreenContext, CGRectMake(0, 0, width, height), imageRef);
     CGImageRef imageRefWithAlpha = CGBitmapContextCreateImage(offscreenContext);
-    UIImage *imageWithAlpha = [UIImage imageWithCGImage:imageRefWithAlpha];
+    UIImage *imageWithAlpha = [UIImage imageWithCGImage:imageRefWithAlpha scale:self.scale
+                                            orientation:self.imageOrientation];
     
     // Clean up
     CGContextRelease(offscreenContext);
@@ -53,7 +54,7 @@
     // If the image does not have an alpha layer, add one
     UIImage *image = [self imageWithAlpha];
     
-    CGRect newRect = CGRectMake(0, 0, image.size.width + borderSize * 2, image.size.height + borderSize * 2);
+    CGRect newRect = CGRectMake(0, 0, image.size.width * self.scale + borderSize * 2 * self.scale, image.size.height * self.scale + borderSize * 2 * self.scale);
     
     // Build a context that's the same dimensions as the new size
     CGContextRef bitmap = CGBitmapContextCreate(NULL,
@@ -65,14 +66,14 @@
                                                 CGImageGetBitmapInfo(self.CGImage));
     
     // Draw the image in the center of the context, leaving a gap around the edges
-    CGRect imageLocation = CGRectMake(borderSize, borderSize, image.size.width, image.size.height);
+    CGRect imageLocation = CGRectMake(borderSize * self.scale, borderSize * self.scale, image.size.width * self.scale, image.size.height * self.scale);
     CGContextDrawImage(bitmap, imageLocation, self.CGImage);
     CGImageRef borderImageRef = CGBitmapContextCreateImage(bitmap);
     
     // Create a mask to make the border transparent, and combine it with the image
-    CGImageRef maskImageRef = [self newBorderMask:borderSize size:newRect.size];
+    CGImageRef maskImageRef = [self newBorderMask:borderSize * self.scale size:newRect.size];
     CGImageRef transparentBorderImageRef = CGImageCreateWithMask(borderImageRef, maskImageRef);
-    UIImage *transparentBorderImage = [UIImage imageWithCGImage:transparentBorderImageRef];
+    UIImage *transparentBorderImage = [UIImage imageWithCGImage:transparentBorderImageRef scale:self.scale orientation:self.imageOrientation];
     
     // Clean up
     CGContextRelease(bitmap);
